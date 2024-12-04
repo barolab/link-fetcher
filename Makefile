@@ -1,13 +1,16 @@
 PWD:=$(shell pwd)
 
 test:
-	@go run main.go -o stdout https://news.ycombinator.com/
+	@dagger call test
 
 fmt:
-	@go fmt main.go
+	@dagger call fmt export --path=.
 
 build:
-	@go build .
+	@dagger call build
+
+scan:
+	@dagger call scan
 
 lint:
-	@golangci-lint run --out-format tab
+	@dagger call lint
