@@ -97,13 +97,23 @@ func (m *LinkFetcher) Lint(
 	// +ignore=["*", "!*.go", "!go.mod", "!go.sum"]
 	src *dagger.Directory,
 ) (string, error) {
-	return dag.Container().
+	result, err := dag.Container().
 		From("golangci/golangci-lint").
 		WithDirectory("/src", src).
 		WithWorkdir("/src").
 		WithExec([]string{"go", "mod", "tidy"}).
 		WithExec([]string{"golangci-lint", "run", "."}).
 		Stdout(ctx)
+
+	if err != nil {
+		return "", err
+	}
+
+	if result != "" {
+		return result, nil
+	}
+
+	return "All good", nil
 }
 
 // Scan the given image for vulnerabilities

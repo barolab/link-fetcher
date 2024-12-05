@@ -12,6 +12,8 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    env:
+      SHUTUP: 1
     steps:
     - name: checkout
       uses: actions/checkout@v4
@@ -19,4 +21,6 @@ jobs:
     - name: lint
       uses: dagger/dagger-for-github@v6
       with:
+        version: "0.14.0"
         call: lint
+        dagger-flags: "--progress=plain --silent"
