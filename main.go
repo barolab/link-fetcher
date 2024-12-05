@@ -96,8 +96,8 @@ func getLinksFromURLs(ctx context.Context, urls []string) ([]string, error) {
 	// Share the same HTTP client for all the URLs
 	client := &http.Client{Transport: &http.Transport{}}
 
-	// Set a timeout of 30s to fetch all the URLs
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	// Set a timeout of 60s to fetch all the URLs
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	// Start a routing for each URL, using a waitgroup like library (eg. piper module)
@@ -160,6 +160,13 @@ func main() {
 				Aliases: []string{"o"},
 				Sources: cli.EnvVars("OUTPUT"),
 			},
+			&cli.BoolFlag{
+				Name:    "sleep",
+				Value:   false,
+				Usage:   "Sleep endlessly after printing output",
+				Aliases: []string{"s"},
+				Sources: cli.EnvVars("SLEEP"),
+			},
 		},
 		Name:  "link-fetcher",
 		Usage: "list all links of given URLs",
@@ -191,6 +198,14 @@ func main() {
 			default:
 				return fmt.Errorf("unkown format %s, supported values are 'json' and 'stdout'", output)
 			}
+
+			// Sleep forever
+			if cmd.Bool("sleep") {
+				for {
+					time.Sleep(1 * time.Second)
+				}
+			}
+
 			return nil
 		},
 	}
