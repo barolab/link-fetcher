@@ -1,0 +1,36 @@
+name: Deploy
+on:
+  # workflow_run:
+  #   workflows: [ "Build" ]
+  #   types: [ "completed" ]
+  workflow_dispatch:
+  push:
+    branches: [ "*" ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      SHUTUP: 1
+    steps:
+    - id: checkout
+      name: checkout
+      uses: actions/checkout@v4
+
+    - id: k3s
+      name: k3s
+      uses: debianmaster/actions-k3s@master
+      with:
+        version: 'v1.21.2-k3s1'
+
+    - name: deploy
+      uses: dagger/dagger-for-github@v7
+      with:
+        version: "latest"
+        call: deploy --kubeconfig=${{ steps.k3s.outputs.kubeconfig }}
+
+    - name: validate
+      uses: dagger/dagger-for-github@v7
+      with:
+        version: "latest"
+        call: validate --kubeconfig=${{ steps.k3s.outputs.kubeconfig }}
