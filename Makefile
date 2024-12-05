@@ -14,3 +14,6 @@ scan:
 
 lint:
 	@dagger call lint
+
+integration-test:
+	@dagger call integration-test
