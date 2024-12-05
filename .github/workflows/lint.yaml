@@ -1,0 +1,22 @@
+name: Lint
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    types:
+    - opened
+    - synchronize
+    - reopened
+    - ready_for_review
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+
+    - name: lint
+      uses: dagger/dagger-for-github@v6
+      with:
+        call: lint
