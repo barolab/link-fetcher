@@ -149,7 +149,7 @@ func (m *LinkFetcher) Deploy(
 	// +defaultPath="./"
 	// +ignore=["*", "!**/*.yaml"]
 	src *dagger.Directory,
-	// +defaultPath="$HOME/.kube/config"
+	// +defaultPath="~/.kube/config"
 	kubeconfig *dagger.File,
 ) (string, error) {
 	return m.kubectl(src, kubeconfig).WithExec([]string{"sh", "-c", "kubectl apply -f /src/kubernetes/deployment.yaml"}).Stdout(ctx)
@@ -167,7 +167,7 @@ func (m *LinkFetcher) Validate(
 	kubectl := m.kubectl(src, kubeconfig)
 
 	// Wait for the POD to boot
-	_, err := kubectl.WithExec([]string{"sh", "-c", "kubectl rollout status deploy link-fetcher --timeout=30s"}).Stdout(ctx)
+	_, err := kubectl.WithExec([]string{"sh", "-c", "kubectl rollout status deploy link-fetcher --timeout=60s"}).Stdout(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to wait for link-fetcher to be ready, %w", err)
 	}
@@ -219,15 +219,15 @@ func (m *LinkFetcher) IntegrationTest(
 	}
 	defer kServer.Stop(ctx)
 
+	// Wait a bit for the K3S cluster to become ready
+	time.Sleep(1 * time.Second)
+
 	// Deploy our application
 	deploy, err := m.Deploy(ctx, src, k3s.Config())
 	output["deploy"] = deploy
 	if err != nil {
 		return "", err
 	}
-
-	// Wait 10 seconds for the POD to boot and add a timeout to context to ensure we don't enter an infine loop
-	time.Sleep(10 * time.Second)
 
 	// Validate the application is running
 	validate, err := m.Validate(ctx, src, k3s.Config())
