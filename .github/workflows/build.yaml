@@ -1,0 +1,21 @@
+name: Build
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "*" ]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      SHUTUP: 1
+    steps:
+    - id: checkout
+      name: Checkout
+      uses: actions/checkout@v4
+
+    - id: build
+      name: Build & Push
+      uses: dagger/dagger-for-github@v7
+      with:
+        version: "latest"
+        call: build
