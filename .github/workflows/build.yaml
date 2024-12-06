@@ -9,10 +9,12 @@ jobs:
     env:
       SHUTUP: 1
     steps:
-    - name: checkout
+    - id: checkout
+      name: Checkout
       uses: actions/checkout@v4
 
-    - name: build
+    - id: build
+      name: Build & Push
       uses: dagger/dagger-for-github@v7
       with:
         version: "latest"

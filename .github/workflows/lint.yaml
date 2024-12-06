@@ -9,10 +9,12 @@ jobs:
     env:
       SHUTUP: 1
     steps:
-    - name: checkout
+    - id: checkout
+      name: Checkout
       uses: actions/checkout@v4
 
-    - name: lint
+    - id: lint
+      name: Lint
       uses: dagger/dagger-for-github@v7
       with:
         version: "latest"
