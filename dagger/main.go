@@ -100,10 +100,14 @@ func (m *LinkFetcher) Lint(
 }
 
 // Scan the given image for vulnerabilities
-func (m *LinkFetcher) Scan(ctx context.Context, image *string) (string, error) {
+func (m *LinkFetcher) Scan(
+	ctx context.Context,
+	// +default="ttl.sh/link-fetcher:latest"
+	image string,
+) (string, error) {
 	return dag.Container().
 		From("aquasec/trivy").
-		WithExec([]string{"trivy", "image", *image}).
+		WithExec([]string{"trivy", "image", image}).
 		Stdout(ctx)
 }
 

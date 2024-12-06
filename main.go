@@ -150,7 +150,6 @@ func getLinksFromURLs(ctx context.Context, urls []string) ([]string, error) {
 // Main function whose sole purpose is to run the CLI application
 func main() {
 	cmd := &cli.Command{
-
 		// Define the flag used to configure the output format
 		Flags: []cli.Flag{
 			&cli.StringFlag{

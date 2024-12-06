@@ -17,5 +17,13 @@ jobs:
       name: Build & Push
       uses: dagger/dagger-for-github@v7
       with:
+        engine-stop: "false"
         version: "latest"
         call: build
+
+    - id: scan
+      name: Scan the image for security vulnerability
+      uses: dagger/dagger-for-github@v7
+      with:
+        version: "latest"
+        call: scan
