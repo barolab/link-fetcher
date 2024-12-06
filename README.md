@@ -102,9 +102,39 @@ Total: 2 (UNKNOWN: 0, LOW: 2, MEDIUM: 0, HIGH: 0, CRITICAL: 0)
 ## Kubernetes
 
 Link Fetcher can be deployed on Kubernetes using the manifest availabe in [kubernetes/deployment.yaml](/kubernetes/deployment.yaml).
-To make it easier to deploy and validate, some dagger functions are there to help.
+To make it easier to deploy and validate, some dagger functions are there to help, here's some helpful commands:
 
-To test a full pipeline locally, you can use the `dagger call integration-test` command.
+```sh
+# Start a local K3S cluster, this will run forever, you'll have to Ctrl+C to stop the cluster
+$ dagger call -m "github.com/marcosnils/daggerverse/k3s@k3s/v0.1.7" --name=test server up
+
+# In another terminal, you can get the cluster KUBECONFIG file on your host with
+$ dagger call -m "github.com/marcosnils/daggerverse/k3s@k3s/v0.1.7" --name=test config export --path=/tmp/kubeconfig
+
+# You can use that module to run kubectl commands; like checking namespaces are present
+$ dagger call -m "github.com/marcosnils/daggerverse/k3s@k3s/v0.1.7" --name=test kubectl --args="get ns" stdout
+
+# You can also spin up a K9S terminal on the K3S cluster for troubleshooting
+$ dagger call -m "github.com/marcosnils/daggerverse/k3s@k3s/v0.1.7" --name=test kns terminal
+
+# To deploy the application, simply call our own Dagger function with the K3S cluster KUBECONFIG file
+$ dagger call deploy --kubeconfig=/tmp/kubeconfig
+deployment.apps/link-fetcher created
+
+# You can check that the Deployment is runnning
+$ dagger call status --kubeconfig=/tmp/kubeconfig
+Waiting for deployment "link-fetcher" rollout to finish: 0 of 1 updated replicas are available...
+deployment "link-fetcher" successfully rolled out
+
+# And finally you can retrive the Link Fetcher logs, and validate the output is valid
+$ dagger call logs --kubeconfig=/tmp/kubeconfig
+{"http://timhulsizer.com":["/cwords/chonk.html"], ...}
+$ dagger call validate --kubeconfig=/tmp/kubeconfig
+Found 29 results, validation succeeded
+```
+
+
+To test a full pipeline locally, you can also use the `dagger call integration-test` command.
 Internally this command will:
 - Build the Docker image and publish it to ttl.sh
 - Start a [K3S cluster](./dagger/main.go#L214)
