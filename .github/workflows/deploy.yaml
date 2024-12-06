@@ -17,20 +17,30 @@ jobs:
       name: checkout
       uses: actions/checkout@v4
 
-    - id: k3s
-      name: k3s
-      uses: debianmaster/actions-k3s@master
+    - id: minikube
+      name: Start Minikube
+      uses: medyagh/setup-minikube@v0.0.18
       with:
-        version: 'v1.21.2-k3s1'
+        kubernetes-version: "1.31.0"
+        minikube-version: "1.34.0"
+
+    - id: get-ip
+      run: echo "MINIKUBE_IP=$(minikube ip)" >> $GITHUB_ENV
 
     - name: deploy
       uses: dagger/dagger-for-github@v7
       with:
         version: "latest"
-        call: deploy --kubeconfig=${{ steps.k3s.outputs.kubeconfig }}
+        call: deploy --kubeconfig="$HOME/.kube/config" --kube="tcp://$MINIKUBE_IP:8443" --kube-port=8443 --certs="$HOME/.minikube" --certs-path="$HOME/.minikube" --insecure
+
+    - name: status
+      uses: dagger/dagger-for-github@v7
+      with:
+        version: "latest"
+        call: status --kubeconfig="$HOME/.kube/config" --kube="tcp://$MINIKUBE_IP:8443" --kube-port=8443 --certs="$HOME/.minikube" --certs-path="$HOME/.minikube" --insecure
 
     - name: validate
       uses: dagger/dagger-for-github@v7
       with:
         version: "latest"
-        call: validate --kubeconfig=${{ steps.k3s.outputs.kubeconfig }}
+        call: validate --kubeconfig="$HOME/.kube/config" --kube="tcp://$MINIKUBE_IP:8443" --kube-port=8443 --certs="$HOME/.minikube" --certs-path="$HOME/.minikube" --insecure
